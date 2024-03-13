@@ -4,7 +4,7 @@ debugpy.listen(5690)
 print("Waiting for debugger attach")
 debugpy.wait_for_client()
 print("Debugger attached")
-Check if CUDA is available
+# Check if CUDA is available
 if torch.cuda.is_available():
     print("CUDA is available. Here are the CUDA devices:")
     # List available CUDA devices

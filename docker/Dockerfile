@@ -6,6 +6,12 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get install libgl1-mesa-glx libglib2.0-0 -y
 RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev git -y
 
+# Define a build-time argument for the MASTER_HOST
+ARG MASTER_HOST_ARG=10.172.4.244:14550  # default value
+
+# Set the environment variable inside the image
+ENV MASTER_HOST=$MASTER_HOST_ARG
+
 # Install miniconda
 ENV CONDA_DIR /opt/conda
 RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh && \
@@ -25,6 +31,7 @@ RUN pip install mmdet==2.20.0
 RUN pip install nuscenes-devkit
 RUN pip install mpi4py==3.0.3
 RUN pip install numba==0.48.0
+RUN pip install debugpy
 
 
 #numpy long problem

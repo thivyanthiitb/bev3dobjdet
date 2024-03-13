@@ -2,11 +2,12 @@
 
 XSOCK=/tmp/.X11-unix
 XAUTH=/tmp/.docker.xauth
+# mkdir -p $XAUTH
 touch $XAUTH
+echo "1"
 xauth nlist $DISPLAY | sed -e 's/^..../ffff/' | xauth -f $XAUTH nmerge -
 
 echo "Running Docker Container"
-CONTAINER_NAME=bevfusion_container
 
 # Check if an argument is provided
 if [ $# -eq 0 ]; then
@@ -23,6 +24,7 @@ sudo docker run \
   --privileged \
   --gpus all \
   -p 14550:14550 \
+  -p 5690:5690 \
   --volume=$XSOCK:$XSOCK:rw \
   --volume=$XAUTH:$XAUTH:rw \
   --env="XAUTHORITY=${XAUTH}" \
@@ -31,4 +33,3 @@ sudo docker run \
   -v /dev/shm:/dev/shm \
   -v $(pwd):$(pwd) -w $(pwd)\
   $DOCKER_IMAGE_NAME
-

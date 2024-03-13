@@ -19,11 +19,11 @@ from mmdet.datasets import replace_ImageToTensor
 from mmdet3d.utils import recursive_eval
 import time
 
-# import debugpy
-# debugpy.listen(5690)
-# print("Waiting for debugger attach")
-# debugpy.wait_for_client()
-# print("Debugger attached")
+import debugpy
+debugpy.listen(5690)
+print("Waiting for debugger attach")
+debugpy.wait_for_client()
+print("Debugger attached")
 
 
 def parse_args():

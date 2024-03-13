@@ -55,17 +55,17 @@ class BEVEvolvingBlock(nn.Sequential):
         reference_points = ref[None, :, :]
         return reference_points
 
-    def forward(self, tgt, pos, query_pos=None, src=None, src_spatial_shape=None):
+    def forward(self, tgt, query_pos, pos=None, src=None, src_spatial_shape=None):
         tgt2 = self.norm1(tgt)
 
         if self.is_cross_attn:
             reference_points = self.get_reference_points(src_spatial_shape, src.device)
             tgt2 = self.cross_attn(
-                tgt2 + query_pos, reference_points, src, [src_spatial_shape]
+                tgt2 + query_pos, reference_points, src, 
+                torch.tensor([src_spatial_shape]), [0]
             )
         else:
-            # TODO: check deformable detr
-            q = k = tgt2 + pos
+            q = k = tgt2 + query_pos
             tgt2 = self.self_attn(q, k, value=src)[0]
 
         tgt = tgt + tgt2
@@ -106,31 +106,39 @@ class MetaFuser(nn.Module):
         cam_ft, lidar_ft = features
         # shape from (B, C, H, W) to (B, H*W, C)
         bs, c, h, w = cam_ft.shape
-        src_spatial_shape = (h, w)
-        flat_cam_ft = cam_ft.flatten(2).permute(2, 0, 1)
-        flat_lidar_ft = lidar_ft.flatten(2).permute(2, 0, 1)
+        src_spatial_shape = [h, w]
+        # flat_cam_ft = cam_ft.flatten(2).permute(2, 0, 1)
+        flat_cam_ft = cam_ft.flatten(2).transpose(1, 2)
+        # flat_lidar_ft = lidar_ft.flatten(2).permute(2, 0, 1)
+        flat_lidar_ft = lidar_ft.flatten(2).transpose(1, 2)
+
         pos_embed = self.sinEmbed(torch.zeros(bs, self.out_channels, h, w))
-        pos_embed = pos_embed.flatten(2).permute(2, 0, 1)
-        query_embed = self.query_embed.weight.unsqueeze(1).repeat(1, bs, 1)
+        pos_embed = pos_embed.to(flat_cam_ft.device) # BUG: may fuckup 
+        # pos_embed = pos_embed.flatten(2).permute(2, 0, 1)
+        pos_embed = pos_embed.unsqueeze(0).expand(bs, -1, -1)
+
+        query_embed = self.query_embed.weight
+        # query_embed = query_embed.unsqueeze(1).repeat(1, bs, 1)
+        query_embed = query_embed.unsqueeze(0).expand(bs, -1, -1)
 
         tgt = torch.zeros_like(query_embed)
         tgt = self.cross_1(
             tgt,
-            flat_lidar_ft,
+            src=flat_lidar_ft,
             pos=pos_embed,
             query_pos=query_embed,
             src_spatial_shape=src_spatial_shape,
         )
         tgt = self.cross_2(
             tgt,
-            flat_cam_ft,
+            src=flat_cam_ft,
             pos=pos_embed,
             query_pos=query_embed,
             src_spatial_shape=src_spatial_shape,
         )
         tgt = self.cross_3(
             tgt,
-            self.fuser([cam_ft, lidar_ft]),
+            src=self.fuser([cam_ft, lidar_ft]),
             pos=pos_embed,
             query_pos=query_embed,
             src_spatial_shape=src_spatial_shape,

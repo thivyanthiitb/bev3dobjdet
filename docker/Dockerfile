@@ -38,4 +38,4 @@ RUN pip install debugpy
 RUN pip install numpy==1.22.0
 
 #master host error
-RUN export MASTER_HOST=10.172.4.244:14550
+#RUN export MASTER_HOST=10.172.4.244:14550

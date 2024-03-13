@@ -14,8 +14,8 @@ __all__ = ["MetaFuser"]
 class BEVEvolvingBlock(nn.Sequential):
     def __init__(
         self,
+        hidden_dim,
         is_cross_attn=True,
-        d_model=256,
         ffn_dim=256,
         n_heads=8,
         n_points=8,
@@ -24,24 +24,18 @@ class BEVEvolvingBlock(nn.Sequential):
         super().__init__()
         self.is_cross_attn = is_cross_attn
 
-        self.norm1 = nn.LayerNorm(d_model)
+        self.norm1 = nn.LayerNorm(hidden_dim)
 
-        if self.is_cross_attn:
-            self.cross_attn = MSDeformAttn(
-                d_model, 1, n_heads, n_points
-            )  # 1 is the number of levels
-        else:
-            # use deformable attn
-            self.self_attn = nn.MultiheadAttention(d_model, n_heads, dropout=dropout)
+        self.attn = MSDeformAttn(hidden_dim, 1, n_heads, n_points)  # 1 is the number of levels
 
-        self.norm2 = nn.LayerNorm(d_model)
+        self.norm2 = nn.LayerNorm(hidden_dim)
 
         # TODO: choose a proper FFN
         self.ffn = nn.Sequential(
-            nn.Linear(d_model, ffn_dim),
+            nn.Linear(hidden_dim, ffn_dim),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Linear(ffn_dim, d_model),
+            nn.Linear(ffn_dim, hidden_dim),
             nn.ReLU(),
         )
 
@@ -53,27 +47,43 @@ class BEVEvolvingBlock(nn.Sequential):
             if isinstance(m, MSDeformAttn):
                 m._reset_parameters()
 
-    def forward(self, tgt, query_pos, pos=None, src=None, reference_points=None, src_spatial_shape=None):
-        """
-        pos' use?
+    @staticmethod
+    def get_reference_points(spatial_shape, device):
+        H, W = spatial_shape
+        ref_y, ref_x = torch.meshgrid(
+            torch.linspace(0.5, H - 0.5, H, dtype=torch.float32, device=device),
+            torch.linspace(0.5, W - 0.5, W, dtype=torch.float32, device=device),
+        )
+        ref = torch.stack((ref_x.reshape(-1), ref_y.reshape(-1)), -1)
+        reference_points = ref[None, :, :]
+        return reference_points
+    
 
-        tgt.shape: []
-        query_pos.shape: []
-        src.shape: []
-
-        """
-        
+    def forward(self, tgt, query_pos=None, pos=None, src=None, reference_points=None, src_spatial_shape=None):  
         tgt2 = self.norm1(tgt)
 
         if self.is_cross_attn:
             # reference_points = self.reference_points(src_spatial_shape, src.device)
-            tgt2 = self.cross_attn(
-                tgt2 + query_pos, reference_points, src, 
-                torch.tensor([src_spatial_shape]), [0]
+            reference_points = reference_points.unsqueeze(2)
+            tgt2 = self.attn(
+                tgt2 + query_pos, 
+                reference_points.to(dtype=torch.float32), 
+                src.to(dtype=torch.float32), 
+                torch.tensor([src_spatial_shape], device=src.device), 
+                torch.tensor([0], device=src.device)
             )
         else:
-            q = k = tgt2 + query_pos
-            tgt2 = self.self_attn(q.transpose(0, 1), k.transpose(0, 1), tgt2.transpose(0, 1))[0].transpose(0, 1)
+            # in deformable detr, src is used instead of pos but to keep conisitent 
+            # with self.norm1(tgt), tgt is gonna provide source for this
+            reference_points = self.get_reference_points(src_spatial_shape, tgt.device).unsqueeze(2)
+            tgt2 = self.attn(
+                tgt + pos, 
+                reference_points.to(dtype=torch.float32), 
+                tgt.to(dtype=torch.float32), 
+                torch.tensor([src_spatial_shape], device=tgt.device), 
+                torch.tensor([0], device=tgt.device)
+            )
+            
 
         tgt = tgt + tgt2
 
@@ -95,40 +105,41 @@ class MetaFuser(nn.Module):
         dropout=0.1,
     ) -> None:
         super().__init__()
-        """
-        Mimicing Deformable DETR's decoder
-        """
 
-        # self.sinEmbed = SinePositionEmbedding(d_model // 2, normalize=True)
         self.out_channels = out_channels
         self.reference_points = nn.Linear(d_model, 2)
         self.query_embed = nn.Embedding(num_queries, 2 * d_model)
+        self.sinEmbed = SinePositionEmbedding(d_model // 2, normalize=True)
 
-        self.cross_1 = BEVEvolvingBlock(is_cross_attn=True)
-        self.cross_2 = BEVEvolvingBlock(is_cross_attn=True)
-        self.cross_3 = BEVEvolvingBlock(is_cross_attn=True)
+        self.cross_1 = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
+        self.cross_2 = BEVEvolvingBlock(self.out_channels,  is_cross_attn=True)
+        self.cross_3 = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
 
         self.fuser = NaiveFuser(in_channels, out_channels)
 
-        self.self_1 = BEVEvolvingBlock(is_cross_attn=False)
-        self.self_2 = BEVEvolvingBlock(is_cross_attn=False)
+        self.self_1 = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
+        self.self_2 = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
 
     def _reset_parameters(self):
         xavier_uniform_(self.reference_points.weight.data, gain=1.0)
         constant_(self.reference_points.bias.data, 0.)
 
     def forward(self, features) -> torch.Tensor:
-        cam_ft, lidar_ft = features
+        # cam_ft, lidar_ft = features
+
         # shape from (B, C, H, W) to (B, H*W, C)
-        bs, c, h, w = cam_ft.shape
+        bs, c, h, w = features[0].shape  # shape of camera features
         src_spatial_shape = [h, w]
-        flat_cam_ft = cam_ft.flatten(2).transpose(1, 2)
-        flat_lidar_ft = lidar_ft.flatten(2).transpose(1, 2)
+
+        # flat_cam_ft = cam_ft.flatten(2).transpose(1, 2)
+        # flat_lidar_ft = lidar_ft.flatten(2).transpose(1, 2)
+
+        fused_features = self.fuser(features).flatten(2).transpose(1, 2)
 
         # deformable detr doesnt seem to be using pos_embed
-        # pos_embed = self.sinEmbed(torch.zeros(bs, self.out_channels, h, w))
-        # pos_embed = pos_embed.to(flat_cam_ft.device) # BUG: may fuckup 
-        # pos_embed = pos_embed.unsqueeze(0).expand(bs, -1, -1)
+        pos_embed = self.sinEmbed(torch.zeros(bs, self.out_channels, h, w))
+        pos_embed = pos_embed.to(fused_features.device)
+        pos_embed = pos_embed.flatten(2).transpose(1, 2)
 
         query_embed = self.query_embed.weight
         query_embed, tgt = torch.split(query_embed, self.out_channels, dim=1)
@@ -139,30 +150,28 @@ class MetaFuser(nn.Module):
 
         tgt = self.cross_1(
             tgt,
-            src=flat_lidar_ft,
-            # pos=pos_embed,
+            src=fused_features,
             query_pos=query_embed,
             reference_points=reference_points,
             src_spatial_shape=src_spatial_shape,
         )
         tgt = self.cross_2(
             tgt,
-            src=flat_cam_ft,
-            # pos=pos_embed,
+            src=fused_features,
             query_pos=query_embed,
             reference_points=reference_points,
             src_spatial_shape=src_spatial_shape,
         )
         tgt = self.cross_3(
-            tgt,
-            src=self.fuser([cam_ft, lidar_ft]),
-            # pos=pos_embed,
+            tgt=tgt,
+            src=fused_features,
             query_pos=query_embed,
             reference_points=reference_points,
             src_spatial_shape=src_spatial_shape,
         )
 
-        tgt = self.self_1(tgt, pos=pos_embed)
-        tgt = self.self_2(tgt, pos=pos_embed)
+        tgt = self.self_1(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
+        tgt = self.self_2(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
 
+        tgt = torch.reshape(tgt, (bs, self.out_channels, h, w)).to(dtype=torch.float16)
         return tgt

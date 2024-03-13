@@ -76,6 +76,10 @@ def main():
             cfg["sync_bn"] = dict(exclude=[])
         model = convert_sync_batchnorm(model, exclude=cfg["sync_bn"]["exclude"])
 
+    # pytorch_total_params = sum(p.numel() for p in model.parameters())
+    # pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
     logger.info(f"Model:\n{model}")
     train_model(
         model,

@@ -136,3 +136,4 @@ pretrained/
 submission/*
 test/*
 docker_images/
+/checkpoints

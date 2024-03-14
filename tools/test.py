@@ -146,11 +146,13 @@ def main():
     if cfg.get("cudnn_benchmark", False):
         torch.backends.cudnn.benchmark = True
 
+    samples_per_gpu = 1
     cfg.model.pretrained = None
     # in case the test dataset is concatenated
     if isinstance(cfg.data.test, dict):
         cfg.data.test.test_mode = True
         samples_per_gpu = cfg.data.test.pop("samples_per_gpu", 1)
+        samples_per_gpu = 2
         if samples_per_gpu > 1:
             # Replace 'ImageToTensor' to 'DefaultFormatBundle'
             cfg.data.test.pipeline = replace_ImageToTensor(cfg.data.test.pipeline)
@@ -164,7 +166,6 @@ def main():
             for ds_cfg in cfg.data.test:
                 ds_cfg.pipeline = replace_ImageToTensor(ds_cfg.pipeline)
 
-    samples_per_gpu = 2
     # init distributed env first, since logger depends on the dist info.
     distributed = True
 

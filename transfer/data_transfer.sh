@@ -1,9 +1,3 @@
-#!/bin/bash
-git clone https://github.com/thivyanthiitb/bev3dobjdet.git
-echo "git cloned"
-
-cd bev3dobjdet
-echo "cd into bev3dobjdet project folder"
 
 # Define local (actually remote in this context) and server paths
 LOCAL_USER="umic"

@@ -4,6 +4,18 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    //DON'T DELETE THIS DEBUGGER
+    {
+      "name": "debugpy attach",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+          "host": "localhost",
+          "port": 5690
+      },
+      //"args": ""
+    
+    },
     {
       "name": "Python Debugger: Current File with Arguments",
       "type": "debugpy",

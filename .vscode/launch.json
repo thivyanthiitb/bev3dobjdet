@@ -19,6 +19,17 @@
       "program": "tools/test.py",
       "console": "integratedTerminal",
       "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml --eval bbox"
+    },
+    //DON'T DELETE THIS DEBUGGER
+    {
+      "name": "debugpy attach",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+          "host": "localhost",
+          "port": 5690
+      }
+      //"args": ""
     }
   ]
 }

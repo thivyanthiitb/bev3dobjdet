@@ -2,7 +2,6 @@ initial transfer to mahesh
 .
 ├── data
 │   ├── nuscenes
-    │   ├── maps
     │   ├── nuscenes_dbinfos_train.pkl
     │   ├── nuscenes_gt_database
     │   ├── nuscenes_infos_test.pkl
@@ -10,8 +9,6 @@ initial transfer to mahesh
     │   ├── nuscenes_infos_val.pkl
     │   ├── robodrive_infos_test.pkl
     │   ├── robodrive-v1.0-test
-    │   ├── v1.0-test
-    │   ├── v1.0-trainval
     └── robodrive-sensor
 ├── docker_images
 │   ├── bevfusion.tar

@@ -1,24 +1,26 @@
 initial transfer to mahesh
 .
 ├── data
-│   ├── maps
-│   ├── nuscenes_dbinfos_train.pkl
-│   ├── nuscenes_gt_database
-│   ├── nuscenes_infos_test.pkl
-│   ├── nuscenes_infos_train.pkl
-│   ├── nuscenes_infos_val.pkl
-│   ├── robodrive_infos_test.pkl
-│   ├── robodrive-v1.0-test
-│   ├── v1.0-test
-│   ├── v1.0-trainval
-│   └── robodrive-sensor
+│   ├── nuscenes
+    │   ├── maps
+    │   ├── nuscenes_dbinfos_train.pkl
+    │   ├── nuscenes_gt_database
+    │   ├── nuscenes_infos_test.pkl
+    │   ├── nuscenes_infos_train.pkl
+    │   ├── nuscenes_infos_val.pkl
+    │   ├── robodrive_infos_test.pkl
+    │   ├── robodrive-v1.0-test
+    │   ├── v1.0-test
+    │   ├── v1.0-trainval
+    └── robodrive-sensor
 ├── docker_images
 │   ├── bevfusion.tar
 │   └── metafuser.tar
 ├── pretrained
 │   ├── bevfusion-det.pth
-│   ├── pth-files
 │   └── swint-nuimages-pretrained.pth
+
+cp -r ./data/robodrive-sensor/* ./data/nuscenes
 
 transfer from mahesh after each train run
 .

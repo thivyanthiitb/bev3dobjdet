@@ -22,6 +22,7 @@ subsequent transfers to mahesh
 │   ├── bevfusion.tar
 │   └── metafuser.tar
 ├── checkpoints
+├── pretrained
 
 cp -r ./data/robodrive-sensor/* ./data/nuscenes
 

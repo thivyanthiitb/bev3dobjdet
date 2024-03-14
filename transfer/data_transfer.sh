@@ -4,13 +4,14 @@ echo "git cloned"
 
 cd bev3dobjdet
 echo "cd into bev3dobjdet project folder"
+
 # Define local (actually remote in this context) and server paths
 LOCAL_USER="umic"
 LOCAL_HOST="10.172.4.244"
 LOCAL_DIR="/media/umic/my_label/repositories/bevfusion2"
 SERVER_DIR="." # The directory on the server where files will be stored
 
-# Define directories and files to check and transfer if they don't exist on the server
+# Define directories and files to sync
 declare -a ITEMS_TO_TRANSFER=(
     "data/nuscenes/nuscenes_dbinfos_train.pkl"
     "data/nuscenes/nuscenes_gt_database"
@@ -24,41 +25,16 @@ declare -a ITEMS_TO_TRANSFER=(
     "pretrained"
 )
 
-# Function to pull files or directories
-pull_if_not_exists() {
-    local item="$1"
-    local local_path="$LOCAL_DIR/$item"
-    local server_path="$SERVER_DIR/$item"
-
-    # Check if the item is a directory or a file
-    if ssh "$LOCAL_USER@$LOCAL_HOST" [ -d "$local_path" ]; then
-        # It's a directory, check if it exists on the server
-        if [ ! -d "$server_path" ]; then
-            # Directory does not exist, pulling it
-            echo "Directory $item does not exist on the server. Pulling..."
-            scp -r "$LOCAL_USER@$LOCAL_HOST:$local_path" "$SERVER_DIR/${item%/*}/"
-        else
-            echo "Directory $item already exists on the server. Skipping..."
-        fi
-    elif ssh "$LOCAL_USER@$LOCAL_HOST" [ -f "$local_path" ]; then
-        # It's a file, check if it exists on the server
-        if [ ! -f "$server_path" ]; then
-            # File does not exist, pulling it
-            echo "File $item does not exist on the server. Pulling..."
-            scp "$LOCAL_USER@$LOCAL_HOST:$local_path" "$SERVER_DIR/${item%/*}/"
-        else
-            echo "File $item already exists on the server. Skipping..."
-        fi
-    else
-        echo "$item does not exist on the local machine. Skipping..."
-    fi
-}
-
-# Loop through each item and transfer it if it does not exist on the server
+# Sync directories or files with rsync
 for item in "${ITEMS_TO_TRANSFER[@]}"; do
-    pull_if_not_exists "$item"
+    local_path="$LOCAL_DIR/$item"
+    server_path="$SERVER_DIR/${item%/*}/" # Adjust path if necessary
+
+    echo "Syncing $item..."
+    rsync -avz --ignore-existing "$LOCAL_USER@$LOCAL_HOST:$local_path" "$server_path"
 done
 
-echo "Transfer complete."
+echo "Sync complete."
+
 cp -r ./data/robodrive-sensor/* ./data/nuscenes
 echo "Directories arranged."

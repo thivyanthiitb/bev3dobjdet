@@ -2,9 +2,6 @@
 git fetch origin
 echo "git fetch origin"
 
-#!/bin/bash
-
-# Assume git fetch origin has been done as needed, before running this script
 
 # Define local (actually remote in this context) and server paths
 LOCAL_USER="umic"

@@ -148,7 +148,6 @@ def main():
 
     cfg.model.pretrained = None
     # in case the test dataset is concatenated
-    samples_per_gpu = 1
     if isinstance(cfg.data.test, dict):
         cfg.data.test.test_mode = True
         samples_per_gpu = cfg.data.test.pop("samples_per_gpu", 1)
@@ -165,6 +164,7 @@ def main():
             for ds_cfg in cfg.data.test:
                 ds_cfg.pipeline = replace_ImageToTensor(ds_cfg.pipeline)
 
+    samples_per_gpu = 2
     # init distributed env first, since logger depends on the dist info.
     distributed = True
 

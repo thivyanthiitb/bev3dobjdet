@@ -1,0 +1,40 @@
+initial transfer to mahesh
+.
+├── data
+│   ├── maps
+│   ├── nuscenes_dbinfos_train.pkl
+│   ├── nuscenes_gt_database
+│   ├── nuscenes_infos_test.pkl
+│   ├── nuscenes_infos_train.pkl
+│   ├── nuscenes_infos_val.pkl
+│   ├── robodrive_infos_test.pkl
+│   ├── robodrive-v1.0-test
+│   ├── v1.0-test
+│   ├── v1.0-trainval
+│   └── robodrive-sensor
+├── docker_images
+│   ├── bevfusion.tar
+│   └── metafuser.tar
+├── pretrained
+│   ├── bevfusion-det.pth
+│   ├── pth-files
+│   └── swint-nuimages-pretrained.pth
+
+transfer from mahesh after each train run
+.
+├── runs
+│   ├── run-003aa5e4-46eca30f
+│   ├── run-003aa5e4-8e5760f8
+│   ├── run-003aa5e4-de54d066
+│   ├── run-32ac7934-8e5760f8
+│   ├── run-32ac7934-98d08268
+│   ├── run-355840b7
+│   ├── run-71c2c712
+│   ├── run-8e5760f8
+│   ├── run-98d08268
+│   ├── run-9d63dde7
+│   ├── run-db1c16dd-8e5760f8
+│   ├── run-db1c16dd-98d08268
+│   └── run-e60594ca-8e5760f8
+├── test
+│   └── convfuser

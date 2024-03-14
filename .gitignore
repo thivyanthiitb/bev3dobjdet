@@ -137,3 +137,5 @@ submission/*
 test/*
 docker_images/
 /checkpoints
+/submission
+/test

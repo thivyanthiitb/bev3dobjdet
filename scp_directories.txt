@@ -20,6 +20,12 @@ initial transfer to mahesh
 │   ├── bevfusion-det.pth
 │   └── swint-nuimages-pretrained.pth
 
+subsequent transfers to mahesh
+├── docker_images
+│   ├── bevfusion.tar
+│   └── metafuser.tar
+├── checkpoints
+
 cp -r ./data/robodrive-sensor/* ./data/nuscenes
 
 transfer from mahesh after each train run

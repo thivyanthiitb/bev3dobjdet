@@ -139,3 +139,4 @@ docker_images/
 /checkpoints
 /submission
 /test
+/all_logs

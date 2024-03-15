@@ -140,3 +140,4 @@ docker_images/
 /submission
 /test
 /all_logs
+/build

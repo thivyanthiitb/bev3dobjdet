@@ -79,6 +79,13 @@ def main():
     # pytorch_total_params = sum(p.numel() for p in model.parameters())
     # pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
+    for p in model.parameters():
+        p.requires_grad = False
+
+    for p in model.parameters():
+        p.requires_grad = True
+        break
+
 
     logger.info(f"Model:\n{model}")
     train_model(

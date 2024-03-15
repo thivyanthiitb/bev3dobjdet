@@ -49,8 +49,7 @@ def train_model(
         model.cuda(),
         device_ids=[torch.cuda.current_device()],
         broadcast_buffers=False,
-        # find_unused_parameters=find_unused_parameters,
-        find_unused_parameters=True,
+        find_unused_parameters=find_unused_parameters,
     )
 
     # debug

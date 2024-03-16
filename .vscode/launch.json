@@ -10,7 +10,7 @@
       "request": "launch",
       "program": "tools/train.py",
       "console": "integratedTerminal",
-      "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml --data.samples_per_gpu 2 &> all_logs/230316_2030.txt"
+      "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml --data.samples_per_gpu 2 &> all_logs/230317_0100.txt"
     },
     {
       "name": "test",

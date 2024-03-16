@@ -49,16 +49,17 @@ def train_model(
         model.cuda(),
         device_ids=[torch.cuda.current_device()],
         broadcast_buffers=False,
-        find_unused_parameters=find_unused_parameters,
+        # find_unused_parameters=find_unused_parameters,
+        find_unused_parameters=True, # for debug, increases training time by a bit
     )
 
     # debug
-    for param in model.parameters():
-        param.requires_grad = False
+    # for param in model.parameters():
+    #     param.requires_grad = False
 
-    for param in model.parameters(): 
-        param.requires_grad = True
-        break
+    # for param in model.parameters(): 
+    #     param.requires_grad = True
+    #     break
 
     # build runner
     optimizer = build_optimizer(model, cfg.optimizer)

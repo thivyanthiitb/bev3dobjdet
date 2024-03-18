@@ -152,5 +152,6 @@ class HungarianAssigner3D(BaseAssigner):
             print("hungarian didn't hungari :(")
     
             # assigned_gt_inds[:] = 0
+            max_overlaps = torch.zeros(200, dtype=torch.int32)
             return AssignResult(
-                num_gts, assigned_gt_inds, None, labels=assigned_labels)
+                num_gts, assigned_gt_inds, max_overlaps, labels=assigned_labels)

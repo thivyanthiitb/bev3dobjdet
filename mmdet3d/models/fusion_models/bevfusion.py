@@ -329,6 +329,10 @@ class BEVFusion(Base3DFusionModel):
             features = features[::-1]
 
         if self.fuser is not None:
+            # need higher accuracy for initial convergence(?)
+            features[0] = features[0].to(dtype=torch.float32)
+            features[1] = features[1].to(dtype=torch.float32)
+
             x = self.fuser(features)
         else:
             assert len(features) == 1, features
@@ -338,6 +342,8 @@ class BEVFusion(Base3DFusionModel):
 
         x = self.decoder["backbone"](x)
         x = self.decoder["neck"](x)
+
+        x[0] = x[0].to(dtype=torch.float32)
 
         if self.training:
             outputs = {}

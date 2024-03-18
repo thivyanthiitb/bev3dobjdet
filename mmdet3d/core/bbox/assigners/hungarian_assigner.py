@@ -125,31 +125,32 @@ class HungarianAssigner3D(BaseAssigner):
             raise ImportError('Please run "pip install scipy" '
                               'to install scipy first.')
         
+
+        assigned_gt_inds[:] = 0
+
         try:
             matched_row_inds, matched_col_inds = linear_sum_assignment(cost)
+        
+            matched_row_inds = torch.from_numpy(matched_row_inds).to(bboxes.device)
+            matched_col_inds = torch.from_numpy(matched_col_inds).to(bboxes.device)
+
+            # 4. assign backgrounds and foregrounds
+            # assign all indices to backgrounds first
+            # assigned_gt_inds[:] = 0
+            # assign foregrounds based on matching results
+            assigned_gt_inds[matched_row_inds] = matched_col_inds + 1
+            assigned_labels[matched_row_inds] = gt_labels[matched_col_inds]
+
+            max_overlaps = torch.zeros_like(iou.max(1).values)
+            max_overlaps[matched_row_inds] = iou[matched_row_inds, matched_col_inds]
+            # max_overlaps = iou.max(1).values
+        
+            return AssignResult(
+                num_gts, assigned_gt_inds, max_overlaps, labels=assigned_labels)
+
         except:
-            print(cls_pred[0].T)
-            print(29*"=")
-            print(gt_labels)
-            print(29*"=")
-            print(bboxes) 
-            print(29*"=")
-            print(gt_bboxes) 
-            print(29*"=")
-            print(train_cfg)
-
-        matched_row_inds = torch.from_numpy(matched_row_inds).to(bboxes.device)
-        matched_col_inds = torch.from_numpy(matched_col_inds).to(bboxes.device)
-
-        # 4. assign backgrounds and foregrounds
-        # assign all indices to backgrounds first
-        assigned_gt_inds[:] = 0
-        # assign foregrounds based on matching results
-        assigned_gt_inds[matched_row_inds] = matched_col_inds + 1
-        assigned_labels[matched_row_inds] = gt_labels[matched_col_inds]
-
-        max_overlaps = torch.zeros_like(iou.max(1).values)
-        max_overlaps[matched_row_inds] = iou[matched_row_inds, matched_col_inds]
-        # max_overlaps = iou.max(1).values
-        return AssignResult(
-            num_gts, assigned_gt_inds, max_overlaps, labels=assigned_labels)
+            print("hungarian didn't hungari :(")
+    
+            # assigned_gt_inds[:] = 0
+            return AssignResult(
+                num_gts, assigned_gt_inds, None, labels=assigned_labels)

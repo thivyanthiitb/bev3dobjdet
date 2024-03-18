@@ -4,13 +4,15 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+    
     {
       "name": "train",
       "type": "debugpy",
       "request": "launch",
       "program": "tools/train.py",
       "console": "integratedTerminal",
-      "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth --data.samples_per_gpu 2 &>> all_logs/230317_0230.txt"
+      "justMyCode": false,
+      "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth --data.samples_per_gpu 2 &>> all_logs/txts/230317_2100.txt"
     },
     {
       "name": "test",

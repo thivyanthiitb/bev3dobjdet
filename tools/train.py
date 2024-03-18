@@ -86,6 +86,8 @@ def main():
     #     p.requires_grad = True
     #     break
 
+    model.load_state_dict(torch.load("all_logs/debug/model_weights.pth"))
+
 
     logger.info(f"Model:\n{model}")
     train_model(

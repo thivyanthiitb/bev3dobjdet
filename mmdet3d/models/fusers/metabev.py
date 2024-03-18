@@ -173,5 +173,5 @@ class MetaFuser(nn.Module):
         tgt = self.self_1(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
         tgt = self.self_2(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
 
-        tgt = torch.reshape(tgt, (bs, self.out_channels, h, w)).to(dtype=torch.float16)
+        tgt = torch.reshape(tgt, (bs, self.out_channels, h, w))
         return tgt

@@ -17,6 +17,7 @@ fi
 DOCKER_IMAGE_NAME=$1
 
 sudo docker run \
+  --runtime nvidia \
   -it \
   --network host \
   --privileged \

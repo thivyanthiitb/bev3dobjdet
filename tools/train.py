@@ -91,14 +91,14 @@ def main():
     model.load_state_dict(metabev_state_dict, strict=False)
 
 
-    for param in model.parameters():
-        param.requires_grad = False
+    # for param in model.parameters():
+    #     param.requires_grad = False
 
-    for param in model.fuser.parameters():
-        param.requires_grad = True
+    # for param in model.fuser.parameters():
+    #     param.requires_grad = True
 
-    for param in model.fuser.fuser.parameters():
-        param.requires_grad = False
+    # for param in model.fuser.fuser.parameters():
+    #     param.requires_grad = False
     
 
     logger.info(f"Model:\n{model}")

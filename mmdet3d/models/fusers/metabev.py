@@ -111,14 +111,16 @@ class MetaFuser(nn.Module):
         self.query_embed = nn.Embedding(num_queries, 2 * d_model)
         self.sinEmbed = SinePositionEmbedding(d_model // 2, normalize=True)
 
-        self.cross_1 = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
-        self.cross_2 = BEVEvolvingBlock(self.out_channels,  is_cross_attn=True)
-        self.cross_3 = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
+        # self.cross_1 = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
+        # self.cross_2 = BEVEvolvingBlock(self.out_channels,  is_cross_attn=True)
+        # self.cross_3 = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
+        self.cross = BEVEvolvingBlock(self.out_channels, is_cross_attn=True)
 
         self.fuser = NaiveFuser(in_channels, out_channels)
 
-        self.self_1 = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
-        self.self_2 = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
+        # self.self_1 = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
+        # self.self_2 = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
+        self.self = BEVEvolvingBlock(self.out_channels, is_cross_attn=False)
 
     def _reset_parameters(self):
         xavier_uniform_(self.reference_points.weight.data, gain=1.0)
@@ -148,21 +150,21 @@ class MetaFuser(nn.Module):
 
         reference_points = self.reference_points(query_embed).sigmoid()
 
-        tgt = self.cross_1(
+        tgt = self.cross(
             tgt,
             src=fused_features,
             query_pos=query_embed,
             reference_points=reference_points,
             src_spatial_shape=src_spatial_shape,
         )
-        tgt = self.cross_2(
+        tgt = self.cross(
             tgt,
             src=fused_features,
             query_pos=query_embed,
             reference_points=reference_points,
             src_spatial_shape=src_spatial_shape,
         )
-        tgt = self.cross_3(
+        tgt = self.cross(
             tgt=tgt,
             src=fused_features,
             query_pos=query_embed,
@@ -170,8 +172,8 @@ class MetaFuser(nn.Module):
             src_spatial_shape=src_spatial_shape,
         )
 
-        tgt = self.self_1(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
-        tgt = self.self_2(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
+        tgt = self.self(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
+        tgt = self.self(tgt, pos=pos_embed, src_spatial_shape=src_spatial_shape)
 
         tgt = torch.reshape(tgt, (bs, self.out_channels, h, w))
         return tgt

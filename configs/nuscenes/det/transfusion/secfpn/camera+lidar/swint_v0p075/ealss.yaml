@@ -4,11 +4,12 @@ model:
     in_channels: [80, 256]
     out_channels: 256
 
-# Path: configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/ealss.yaml
-# EA-LSS settings
+  # Path: configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/ealss.yaml
+  # EA-LSS settings
   encoders:
     camera:
       backbone:
+        type: SwinTransformer
         attn_drop_rate: 0.0
         convert_weights: true
         depths:
@@ -35,10 +36,10 @@ model:
         patch_norm: true
         qk_scale: null
         qkv_bias: true
-        type: SwinTransformer
         window_size: 7
         with_cp: false
       neck:
+        type: GeneralizedLSSFPN
         act_cfg:
           inplace: true
           type: ReLU
@@ -52,11 +53,11 @@ model:
         num_outs: 3
         out_channels: 256
         start_level: 0
-        type: GeneralizedLSSFPN
         upsample_cfg:
           align_corners: false
           mode: bilinear
       vtransform:
+        type: DepthLSSTransform
         dbound:
         - 1.0
         - 60.0
@@ -70,7 +71,6 @@ model:
         - 704
         in_channels: 256
         out_channels: 80
-        type: DepthLSSTransform
         xbound:
         - -54.0
         - 54.0

@@ -19,6 +19,16 @@ class ConvFuser(nn.Sequential):
             nn.ReLU(True),
         )
 
+    def _init_weights(self):
+        # Choose a weight initialization method here (e.g., Xavier initialization)
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.xavier_uniform_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)  # Initialize weights to 1
+                nn.init.constant_(m.bias, 0)   # Initialize bias to 0
+
+
     def forward(self, inputs: List[torch.Tensor]) -> torch.Tensor:
         out = super().forward(torch.cat(inputs, dim=1))
         return out

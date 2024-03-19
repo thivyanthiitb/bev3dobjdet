@@ -52,7 +52,7 @@ def main():
     # log some basic info
     # logger.info(f"Config:\n{cfg.pretty_text}")
     cfg_dict = cfg.to_dict()
-    logger.info(f"Config:\n{pformat(cfg_dict, indent=4)}")
+    # logger.info(f"Config:\n{pformat(cfg_dict, indent=4)}")
 
     # set random seeds
     if cfg.seed is not None:
@@ -76,32 +76,53 @@ def main():
             cfg["sync_bn"] = dict(exclude=[])
         model = convert_sync_batchnorm(model, exclude=cfg["sync_bn"]["exclude"])
 
-    # pytorch_total_params = sum(p.numel() for p in model.parameters())
-    # pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    unibev_bf_pretrained = False
+    metabev_bf_pretrained = False
 
-    model.load_state_dict(torch.load("pretrained/bevfusion-det.pth"), strict=False)
-    
-    metabev_state_dict = model.state_dict()
-    bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
-    
-    metabev_state_dict["fuser.fuser.0.weight"] = bevfusion_state_dict["fuser.0.weight"]
-    metabev_state_dict["fuser.fuser.1.weight"] = bevfusion_state_dict["fuser.1.weight"]
-    metabev_state_dict["fuser.fuser.1.bias"] = bevfusion_state_dict["fuser.1.bias"]
-    
-    model.load_state_dict(metabev_state_dict, strict=False)
+    # TODO: make an argument that toggles this
+    if unibev_bf_pretrained:
+        # pytorch_total_params = sum(p.numel() for p in model.parameters())
+        # pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
+        unibev_state_dict = model.state_dict()
+        bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
 
-    # for param in model.parameters():
-    #     param.requires_grad = False
+        model.load_state_dict(bevfusion_state_dict, strict=False)
 
-    # for param in model.fuser.parameters():
-    #     param.requires_grad = True
+        unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.1.weight"]
+        unibev_state_dict["fuser.conv3x3.bias"]   = bevfusion_state_dict["fuser.1.bias"]
+        
+        model.load_state_dict(unibev_state_dict)
 
-    # for param in model.fuser.fuser.parameters():
-    #     param.requires_grad = False
-    
+        for param in model.parameters():
+            param.requires_grad = False
 
-    logger.info(f"Model:\n{model}")
+        for param in model.fuser.parameters():
+            param.requires_grad = True
+
+    elif metabev_bf_pretrained:
+        metabev_state_dict = model.state_dict()
+        bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
+
+        model.load_state_dict(bevfusion_state_dict, strict=False)
+        
+        metabev_state_dict["fuser.fuser.0.weight"] = bevfusion_state_dict["fuser.0.weight"]
+        metabev_state_dict["fuser.fuser.1.weight"] = bevfusion_state_dict["fuser.1.weight"]
+        metabev_state_dict["fuser.fuser.1.bias"]   = bevfusion_state_dict["fuser.1.bias"]
+        
+        model.load_state_dict(metabev_state_dict, strict=False)
+
+        for param in model.parameters():
+            param.requires_grad = False
+
+        for param in model.fuser.parameters():
+            param.requires_grad = True
+
+        for param in model.fuser.fuser.parameters():
+            param.requires_grad = False
+            
+
+    # logger.info(f"Model:\n{model}")
     train_model(
         model,
         datasets,

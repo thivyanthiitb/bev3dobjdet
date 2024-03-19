@@ -343,7 +343,6 @@ class BEVFusion(Base3DFusionModel):
         x = self.decoder["backbone"](x)
         x = self.decoder["neck"](x)
 
-        x[0] = x[0].to(dtype=torch.float32)
 
         if self.training:
             outputs = {}

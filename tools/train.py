@@ -76,18 +76,30 @@ def main():
             cfg["sync_bn"] = dict(exclude=[])
         model = convert_sync_batchnorm(model, exclude=cfg["sync_bn"]["exclude"])
 
-    pytorch_total_params = sum(p.numel() for p in model.parameters())
-    pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    # pytorch_total_params = sum(p.numel() for p in model.parameters())
+    # pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    # for p in model.parameters():
-    #     p.requires_grad = False
+    model.load_state_dict(torch.load("pretrained/bevfusion-det.pth"), strict=False)
+    
+    metabev_state_dict = model.state_dict()
+    bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
+    
+    metabev_state_dict["fuser.fuser.0.weight"] = bevfusion_state_dict["fuser.0.weight"]
+    metabev_state_dict["fuser.fuser.1.weight"] = bevfusion_state_dict["fuser.1.weight"]
+    metabev_state_dict["fuser.fuser.1.bias"] = bevfusion_state_dict["fuser.1.bias"]
+    
+    model.load_state_dict(metabev_state_dict, strict=False)
 
-    # for p in model.parameters():
-    #     p.requires_grad = True
-    #     break
 
-    model.load_state_dict(torch.load("all_logs/debug/model_weights.pth"))
+    for param in model.parameters():
+        param.requires_grad = False
 
+    for param in model.fuser.parameters():
+        param.requires_grad = True
+
+    for param in model.fuser.fuser.parameters():
+        param.requires_grad = False
+    
 
     logger.info(f"Model:\n{model}")
     train_model(

@@ -1,0 +1,4 @@
+// The Model Structure
+digraph {
+	state_dict [label=state_dict]
+}

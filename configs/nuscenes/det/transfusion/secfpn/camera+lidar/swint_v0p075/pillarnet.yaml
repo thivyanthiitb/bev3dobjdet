@@ -1,0 +1,65 @@
+model:
+  fuser:
+    type: ConvFuser
+    in_channels: [80, 256]
+    out_channels: 256
+
+# Path: configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/pillarnet.yaml
+# pillarnet settings
+  encoders:
+    lidar:
+      backbone:
+        block_type: basicblock
+        encoder_channels:
+        - - 16
+          - 16
+          - 32
+        - - 32
+          - 32
+          - 64
+        - - 64
+          - 64
+          - 128
+        - - 128
+          - 128
+        encoder_paddings:
+        - - 0
+          - 0
+          - 1
+        - - 0
+          - 0
+          - 1
+        - - 0
+          - 0
+          - - 1
+            - 1
+            - 0
+        - - 0
+          - 0
+        in_channels: 5
+        order:
+        - conv
+        - norm
+        - act
+        output_channels: 128
+        sparse_shape:
+        - 1440
+        - 1440
+        - 41
+        type: SparseEncoder
+      voxelize:
+        max_num_points: 10
+        max_voxels:
+        - 120000
+        - 160000
+        point_cloud_range:
+        - -54.0
+        - -54.0
+        - -5.0
+        - 54.0
+        - 54.0
+        - 3.0
+        voxel_size:
+        - 0.075
+        - 0.075
+        - 0.2

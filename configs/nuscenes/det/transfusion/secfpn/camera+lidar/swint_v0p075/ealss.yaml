@@ -1,0 +1,85 @@
+model:
+  fuser:
+    type: ConvFuser
+    in_channels: [80, 256]
+    out_channels: 256
+
+# Path: configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/ealss.yaml
+# EA-LSS settings
+  encoders:
+    camera:
+      backbone:
+        attn_drop_rate: 0.0
+        convert_weights: true
+        depths:
+        - 2
+        - 2
+        - 6
+        - 2
+        drop_path_rate: 0.2
+        drop_rate: 0.0
+        embed_dims: 96
+        init_cfg:
+          checkpoint: pretrained/swint-nuimages-pretrained.pth
+          type: Pretrained
+        mlp_ratio: 4
+        num_heads:
+        - 3
+        - 6
+        - 12
+        - 24
+        out_indices:
+        - 1
+        - 2
+        - 3
+        patch_norm: true
+        qk_scale: null
+        qkv_bias: true
+        type: SwinTransformer
+        window_size: 7
+        with_cp: false
+      neck:
+        act_cfg:
+          inplace: true
+          type: ReLU
+        in_channels:
+        - 192
+        - 384
+        - 768
+        norm_cfg:
+          requires_grad: true
+          type: BN2d
+        num_outs: 3
+        out_channels: 256
+        start_level: 0
+        type: GeneralizedLSSFPN
+        upsample_cfg:
+          align_corners: false
+          mode: bilinear
+      vtransform:
+        dbound:
+        - 1.0
+        - 60.0
+        - 0.5
+        downsample: 2
+        feature_size:
+        - 32
+        - 88
+        image_size:
+        - 256
+        - 704
+        in_channels: 256
+        out_channels: 80
+        type: DepthLSSTransform
+        xbound:
+        - -54.0
+        - 54.0
+        - 0.3
+        ybound:
+        - -54.0
+        - 54.0
+        - 0.3
+        zbound:
+        - -10.0
+        - 10.0
+        - 20.0

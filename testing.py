@@ -17,10 +17,10 @@ def print_dict_structure(d, indent=0):
 # Print the structure of the loaded state dictionary
 print_dict_structure(bevfusion_state_dict)
 # print(bevfusion_state_dict)
-for param_tensor in bevfusion_state_dict:
-    dot.node(param_tensor, param_tensor)
-    # You might need to tailor the following line to your needs for linking
-    # Here, we're just adding nodes. You could add edges if there's a clear hierarchy or flow.
+# for param_tensor in bevfusion_state_dict:
+#     dot.node(param_tensor, param_tensor)
+#     # You might need to tailor the following line to your needs for linking
+#     # Here, we're just adding nodes. You could add edges if there's a clear hierarchy or flow.
 
-print(dot.source)
-dot.render('model-structure.gv', view=True)  # This saves and opens the file automatically
+# print(dot.source)
+# dot.render('model-structure.gv', view=True)  # This saves and opens the file automatically

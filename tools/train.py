@@ -25,6 +25,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", metavar="FILE", help="config file")
     parser.add_argument("--run-dir", metavar="DIR", help="run directory")
+    
+    # Add a new argument for specifying weights
+    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev"],
+                    help="Specify the type of weights to load (none, unibev, metabev)")
+
+    
     args, opts = parser.parse_known_args()
 
     configs.load(args.config, recursive=True)
@@ -75,53 +81,52 @@ def main():
         if not isinstance(cfg["sync_bn"], dict):
             cfg["sync_bn"] = dict(exclude=[])
         model = convert_sync_batchnorm(model, exclude=cfg["sync_bn"]["exclude"])
-
-    unibev_bf_pretrained = True
-    metabev_bf_pretrained = False
-
-    # TODO: make an argument that toggles this
-    if unibev_bf_pretrained:
-        # pytorch_total_params = sum(p.numel() for p in model.parameters())
-        # pytorch_train_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-        unibev_state_dict = model.state_dict()
-        bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
-
-        model.load_state_dict(bevfusion_state_dict, strict=False)
-
-        unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.0.weight"]
-        unibev_state_dict["fuser.bnorm.weight"] = bevfusion_state_dict["fuser.1.weight"]
-        unibev_state_dict["fuser.bnorm.bias"] = bevfusion_state_dict["fuser.1.bias"]
-        
-        model.load_state_dict(unibev_state_dict)
-
-        for param in model.parameters():
-            param.requires_grad = False
-
-        for param in model.fuser.parameters():
-            param.requires_grad = True
-
-    elif metabev_bf_pretrained:
-        metabev_state_dict = model.state_dict()
-        bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
-
-        model.load_state_dict(bevfusion_state_dict, strict=False)
-        
-        metabev_state_dict["fuser.fuser.0.weight"] = bevfusion_state_dict["fuser.0.weight"]
-        metabev_state_dict["fuser.fuser.1.weight"] = bevfusion_state_dict["fuser.1.weight"]
-        metabev_state_dict["fuser.fuser.1.bias"]   = bevfusion_state_dict["fuser.1.bias"]
-        
-        model.load_state_dict(metabev_state_dict, strict=False)
-
-        for param in model.parameters():
-            param.requires_grad = False
-
-        for param in model.fuser.parameters():
-            param.requires_grad = True
-
-        for param in model.fuser.fuser.parameters():
-            param.requires_grad = False
             
+    def load_weights(model, weights_type):
+        if weights_type == 'unibev':
+            # Insert logic to load UNIBEV weights
+            unibev_state_dict = model.state_dict()
+            bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
+
+            model.load_state_dict(bevfusion_state_dict, strict=False)
+
+            unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.0.weight"]
+            unibev_state_dict["fuser.bnorm.weight"] = bevfusion_state_dict["fuser.1.weight"]
+            unibev_state_dict["fuser.bnorm.bias"] = bevfusion_state_dict["fuser.1.bias"]
+            
+            model.load_state_dict(unibev_state_dict)
+
+            for param in model.parameters():
+                param.requires_grad = False
+
+            for param in model.fuser.parameters():
+                param.requires_grad = True
+            
+        elif weights_type == 'metabev':
+            # Insert logic to load METABEV weights
+            metabev_state_dict = model.state_dict()
+            bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
+
+            model.load_state_dict(bevfusion_state_dict, strict=False)
+            
+            metabev_state_dict["fuser.fuser.0.weight"] = bevfusion_state_dict["fuser.0.weight"]
+            metabev_state_dict["fuser.fuser.1.weight"] = bevfusion_state_dict["fuser.1.weight"]
+            metabev_state_dict["fuser.fuser.1.bias"]   = bevfusion_state_dict["fuser.1.bias"]
+            
+            model.load_state_dict(metabev_state_dict, strict=False)
+
+            for param in model.parameters():
+                param.requires_grad = False
+
+            for param in model.fuser.parameters():
+                param.requires_grad = True
+
+            for param in model.fuser.fuser.parameters():
+                param.requires_grad = False
+        # You can add more conditions here for other types of weights
+
+    # Use the new function to load weights based on the command-line argument
+    load_weights(model, args.weights)
 
     # logger.info(f"Model:\n{model}")
     train_model(

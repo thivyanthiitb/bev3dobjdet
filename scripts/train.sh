@@ -10,7 +10,7 @@ if [ "$1" == "1" ]; then
         --dataset_root data/nuscenes/ \
         --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth \
         --data.samples_per_gpu 2 \
-        --max_epochs 6 \
+        --max_epochs 1 \
         2>&1 | tee all_logs/txts/240320_1100_forcefuse_unibev.txt
 elif [ "$1" == "2" ]; then
     echo "Running second training command..."

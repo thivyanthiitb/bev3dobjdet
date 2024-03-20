@@ -89,17 +89,20 @@ def main():
     def load_weights(model, weights_type):
         if weights_type == 'unibev':
             # Insert logic to load UNIBEV weights
-            unibev_state_dict = model.state_dict()
-            bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
+            # unibev_state_dict = model.state_dict()
+            # bevfusion_state_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
 
-            model.load_state_dict(bevfusion_state_dict, strict=False)
+            # model.load_state_dict(bevfusion_state_dict, strict=False)
 
-            unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.0.weight"]
-            unibev_state_dict["fuser.bnorm.weight"] = bevfusion_state_dict["fuser.1.weight"]
-            unibev_state_dict["fuser.bnorm.bias"] = bevfusion_state_dict["fuser.1.bias"]
+            # unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.0.weight"]
+            # unibev_state_dict["fuser.bnorm.weight"] = bevfusion_state_dict["fuser.1.weight"]
+            # unibev_state_dict["fuser.bnorm.bias"] = bevfusion_state_dict["fuser.1.bias"]
             
-            model.load_state_dict(unibev_state_dict)
-
+            # model.load_state_dict(unibev_state_dict)
+            
+            pretrained_unibev_dict = torch.load("pretrained/unibev_epoch_1.pth")
+            model.load_state_dict(pretrained_unibev_dict, strict=False)
+            
             for param in model.parameters():
                 param.requires_grad = False
 

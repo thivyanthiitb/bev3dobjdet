@@ -76,7 +76,7 @@ def main():
             cfg["sync_bn"] = dict(exclude=[])
         model = convert_sync_batchnorm(model, exclude=cfg["sync_bn"]["exclude"])
 
-    unibev_bf_pretrained = False
+    unibev_bf_pretrained = True
     metabev_bf_pretrained = False
 
     # TODO: make an argument that toggles this
@@ -89,8 +89,9 @@ def main():
 
         model.load_state_dict(bevfusion_state_dict, strict=False)
 
-        unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.1.weight"]
-        unibev_state_dict["fuser.conv3x3.bias"]   = bevfusion_state_dict["fuser.1.bias"]
+        unibev_state_dict["fuser.conv3x3.weight"] = bevfusion_state_dict["fuser.0.weight"]
+        unibev_state_dict["fuser.bnorm.weight"] = bevfusion_state_dict["fuser.1.weight"]
+        unibev_state_dict["fuser.bnorm.bias"] = bevfusion_state_dict["fuser.1.bias"]
         
         model.load_state_dict(unibev_state_dict)
 

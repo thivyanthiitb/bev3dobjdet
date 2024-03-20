@@ -1,0 +1,7 @@
+model:
+  fuser:
+    type: UniFuser
+    in_channels: [80, 256]
+    out_channels: 256
+
+# Path: configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/unifuser.yaml

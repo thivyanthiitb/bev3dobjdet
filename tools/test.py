@@ -19,11 +19,11 @@ from mmdet.datasets import replace_ImageToTensor
 from mmdet3d.utils import recursive_eval
 import time
 
-import debugpy
-debugpy.listen(5690)
-print("Waiting for debugger attach")
-debugpy.wait_for_client()
-print("Debugger attached")
+# import debugpy
+# debugpy.listen(5690)
+# print("Waiting for debugger attach")
+# debugpy.wait_for_client()
+# print("Debugger attached")
 
 
 def parse_args():
@@ -152,7 +152,6 @@ def main():
     if isinstance(cfg.data.test, dict):
         cfg.data.test.test_mode = True
         samples_per_gpu = cfg.data.test.pop("samples_per_gpu", 1)
-        samples_per_gpu = 2
         if samples_per_gpu > 1:
             # Replace 'ImageToTensor' to 'DefaultFormatBundle'
             cfg.data.test.pipeline = replace_ImageToTensor(cfg.data.test.pipeline)

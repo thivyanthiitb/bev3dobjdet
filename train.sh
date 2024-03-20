@@ -1,1 +1,1 @@
-python tools/train.py configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth --data.samples_per_gpu 2 &>> all_logs/txts/240319_1100.txt
+python tools/train.py configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/unifuser.yaml --dataset_type RoboDriveDataset --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth --data.samples_per_gpu 2 &>> all_logs/txts/240320_1100_forcefuse_unibev.txt

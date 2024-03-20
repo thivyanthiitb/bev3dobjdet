@@ -105,7 +105,7 @@ def main():
 
             for param in model.fuser.parameters():
                 param.requires_grad = True
-            print("UNIBEV weights loaded")
+            print("unibev weights loaded")
             
         elif weights_type == 'metabev':
             # Insert logic to load METABEV weights
@@ -128,7 +128,7 @@ def main():
 
             for param in model.fuser.fuser.parameters():
                 param.requires_grad = False
-            print("METABEV weights loaded")
+            print("metabev weights loaded")
         # You can add more conditions here for other types of weights
 
     # Use the new function to load weights based on the command-line argument

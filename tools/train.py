@@ -23,12 +23,16 @@ def main():
     dist.init()
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("config", metavar="FILE", help="config file")
-    parser.add_argument("--run-dir", metavar="DIR", help="run directory")
     
     # Add a new argument for specifying weights
     parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev"],
                     help="Specify the type of weights to load (none, unibev, metabev)")
+    
+    
+    parser.add_argument("config", metavar="FILE", help="config file")
+    parser.add_argument("--run-dir", metavar="DIR", help="run directory")
+    
+    
 
     
     args, opts = parser.parse_known_args()
@@ -101,6 +105,7 @@ def main():
 
             for param in model.fuser.parameters():
                 param.requires_grad = True
+            print("UNIBEV weights loaded")
             
         elif weights_type == 'metabev':
             # Insert logic to load METABEV weights
@@ -123,6 +128,7 @@ def main():
 
             for param in model.fuser.fuser.parameters():
                 param.requires_grad = False
+            print("METABEV weights loaded")
         # You can add more conditions here for other types of weights
 
     # Use the new function to load weights based on the command-line argument

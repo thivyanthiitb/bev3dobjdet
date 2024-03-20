@@ -12,5 +12,6 @@ torchpack dist-run -np 2 python tools/train.py \
     --dataset_root data/nuscenes/ \
     --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth \
     --data.samples_per_gpu 12 \
+    --max_epochs 50 \
     --weights unibev \
     2>&1 | tee all_logs/txts/240320_1100_forcefuse_unibev.txt

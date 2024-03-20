@@ -141,3 +141,4 @@ docker_images/
 /test
 /all_logs
 /build
+/mmdet3d/models/ops/build

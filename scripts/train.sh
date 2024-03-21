@@ -22,7 +22,7 @@ elif [ "$1" == "2" ]; then
         --dataset_root data/nuscenes/ \
         --data.samples_per_gpu 14 \
         --max_epochs 3 \
-        --reduce_beams 8 \
+        --reduce_beams 16 \
         --load_augmented mvp \
         2>&1 | tee all_logs/txts/240320_1100_forcefuse_unibev_from_epoch2.txt \
 else

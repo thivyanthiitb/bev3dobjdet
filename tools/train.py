@@ -116,8 +116,8 @@ def main():
             pretrained_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
             model.load_state_dict(pretrained_dict, strict=False)
             
-            # for param in model.parameters():
-            #     param.requires_grad = False
+            for param in model.parameters():
+                param.requires_grad = True
 
             # for param in model.fuser.parameters():
             #     param.requires_grad = True

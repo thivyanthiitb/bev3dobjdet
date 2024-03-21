@@ -103,11 +103,11 @@ def main():
             pretrained_unibev_dict = torch.load("pretrained/unibev_epoch_1.pth")["state_dict"]
             model.load_state_dict(pretrained_unibev_dict, strict=False)
             
-            for param in model.parameters():
-                param.requires_grad = False
+            # for param in model.parameters():
+            #     param.requires_grad = False
 
-            for param in model.fuser.parameters():
-                param.requires_grad = True
+            # for param in model.fuser.parameters():
+            #     param.requires_grad = True
             print("unibev weights loaded")
         
         elif weights_type == 'bevfusion':

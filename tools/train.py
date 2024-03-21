@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser()
     
     # Add a new argument for specifying weights
-    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev"],
+    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev", "bevfusion"],
                     help="Specify the type of weights to load (none, unibev, metabev)")
     
     
@@ -110,7 +110,7 @@ def main():
                 param.requires_grad = True
             print("unibev weights loaded")
         
-        if weights_type == 'bevfusion':
+        elif weights_type == 'bevfusion':
             # Insert logic to load 
             
             pretrained_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]

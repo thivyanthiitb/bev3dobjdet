@@ -100,7 +100,7 @@ def main():
             
             # model.load_state_dict(unibev_state_dict)
             
-            pretrained_unibev_dict = torch.load("pretrained/unibev_epoch_1.pth")
+            pretrained_unibev_dict = torch.load("pretrained/unibev_epoch_1.pth")["state_dict"]
             model.load_state_dict(pretrained_unibev_dict, strict=False)
             
             for param in model.parameters():

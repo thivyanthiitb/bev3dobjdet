@@ -70,7 +70,7 @@ def reduce_LiDAR_beams(pts, reduce_beams_to=32):
     down_ang = -0.5353
     beam_range = torch.linspace(top_ang, down_ang, steps=32)
 
-    if reduce_beams_to == "corruption":
+    if reduce_beams_to == 0:
         # 1. Random Point Drop: Every point has an equal chance to be dropped
         drop_probability = 0.1  # Example drop probability
         drop_mask = torch.rand(len(pts)) > drop_probability

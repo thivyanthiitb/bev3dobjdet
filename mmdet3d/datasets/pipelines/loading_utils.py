@@ -1,5 +1,5 @@
 import os
-
+import random
 import numpy as np
 import torch
 
@@ -54,54 +54,63 @@ def load_augmented_point_cloud(path, virtual=False, reduce_beams=32):
     return points
 
 
+
 def reduce_LiDAR_beams(pts, reduce_beams_to=32):
-    # print(pts.size())
     if isinstance(pts, np.ndarray):
+        is_numpy = True
         pts = torch.from_numpy(pts)
-    radius = torch.sqrt(pts[:, 0].pow(2) + pts[:, 1].pow(2) + pts[:, 2].pow(2))
+    else:
+        is_numpy = False
+
+    radius = torch.sqrt(pts[:, 0]**2 + pts[:, 1]**2 + pts[:, 2]**2)
     sine_theta = pts[:, 2] / radius
-    # [-pi/2, pi/2]
     theta = torch.asin(sine_theta)
-    phi = torch.atan2(pts[:, 1], pts[:, 0])
 
     top_ang = 0.1862
     down_ang = -0.5353
+    beam_range = torch.linspace(top_ang, down_ang, steps=32)
 
-    beam_range = torch.zeros(32)
-    beam_range[0] = top_ang
-    beam_range[31] = down_ang
+    if reduce_beams_to == "corruption":
+        # 1. Random Point Drop: Every point has an equal chance to be dropped
+        drop_probability = 0.1  # Example drop probability
+        drop_mask = torch.rand(len(pts)) > drop_probability
+        pts = pts[drop_mask]
 
-    for i in range(1, 31):
-        beam_range[i] = beam_range[i - 1] - 0.023275
-    # beam_range = [1, 0.18, 0.15, 0.13, 0.11, 0.085, 0.065, 0.03, 0.01, -0.01, -0.03, -0.055, -0.08, -0.105, -0.13, -0.155, -0.18, -0.205, -0.228, -0.251, -0.275,
-    #                -0.295, -0.32, -0.34, -0.36, -0.38, -0.40, -0.425, -0.45, -0.47, -0.49, -0.52, -0.54]
+        # 2. Drop Points within Certain Random View Field Angles
+        start_angle, end_angle = sorted(random.sample(list(beam_range.tolist()), 2))
+        view_field_mask = (theta >= start_angle) & (theta <= end_angle)
+        pts = pts[~view_field_mask]
 
-    num_pts, _ = pts.size()
-    mask = torch.zeros(num_pts)
-    if reduce_beams_to == 16:
-        for id in [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]:
-            beam_mask = (theta < (beam_range[id - 1] - 0.012)) * (
-                theta > (beam_range[id] - 0.012)
-            )
-            mask = mask + beam_mask
-        mask = mask.bool()
-    elif reduce_beams_to == 4:
-        for id in [7, 9, 11, 13]:
-            beam_mask = (theta < (beam_range[id - 1] - 0.012)) * (
-                theta > (beam_range[id] - 0.012)
-            )
-            mask = mask + beam_mask
-        mask = mask.bool()
-    # [?] pick the 14th beam
-    elif reduce_beams_to == 1:
-        chosen_beam_id = 9
-        mask = (theta < (beam_range[chosen_beam_id - 1] - 0.012)) * (
-            theta > (beam_range[chosen_beam_id] - 0.012)
-        )
+        # 3. Beam Drop: Randomly select the number of beams to drop and which beams they are
+        num_beams_to_drop = random.randint(1, 5)  # Randomly choose how many beams to drop
+        beams_to_drop = random.sample(range(32), num_beams_to_drop)  # Which beams to drop
+        beam_drop_mask = torch.ones(len(pts), dtype=torch.bool)
+        for beam_id in beams_to_drop:
+            beam_angle = beam_range[beam_id]
+            next_beam_angle = beam_range[beam_id + 1] if beam_id + 1 < len(beam_range) else beam_angle - 0.023275
+            beam_drop_mask &= ~((theta >= beam_angle) & (theta < next_beam_angle))
+        pts = pts[beam_drop_mask]
+
+    elif reduce_beams_to in [16, 4, 1]:
+        mask = torch.zeros(len(pts), dtype=torch.bool)
+        if reduce_beams_to == 16:
+            selected_beams = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31]
+        elif reduce_beams_to == 4:
+            selected_beams = [7, 9, 11, 13]
+        elif reduce_beams_to == 1:
+            selected_beams = [9]  # Selecting the 9th beam as an example
+
+        for beam_id in selected_beams:
+            beam_angle = beam_range[beam_id]
+            prev_beam_angle = beam_range[beam_id - 1] if beam_id - 1 >= 0 else top_ang
+            beam_mask = (theta >= beam_angle) & (theta < prev_beam_angle)
+            mask |= beam_mask
+
+        pts = pts[mask]
+
     else:
-        raise NotImplementedError
-    # points = copy.copy(pts)
-    points = pts[mask]
-    # print(points.size())
-    return points.numpy()
+        raise NotImplementedError("Supported 'reduce_beams_to' values are 16, 4, 1, or 'corruption'.")
+
+    return pts.numpy() if is_numpy else pts
+
 

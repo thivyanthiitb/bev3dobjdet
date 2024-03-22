@@ -95,7 +95,7 @@ train_pipeline:
     is_train: true
   -
     type: RandomImageZero
-    prob_zero: 0.2
+    prob_zero: 0.4
   -
     type: GlobalRotScaleTrans
     resize_lim: ${augment3d.scale}

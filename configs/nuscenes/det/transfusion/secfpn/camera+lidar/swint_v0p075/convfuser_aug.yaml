@@ -24,9 +24,6 @@ train_pipeline:
     use_dim: ${use_dim}
     reduce_beams: ${reduce_beams}
     load_augmented: ${load_augmented}
-  - 
-    type: RandomPointDrop
-    drop_prob: 0.15
   -
     type: LoadPointsFromMultiSweeps
     sweeps_num: 0

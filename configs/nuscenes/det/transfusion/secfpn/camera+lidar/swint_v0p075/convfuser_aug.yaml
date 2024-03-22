@@ -13,6 +13,9 @@ data:
 #     milestones: [2000, 4000, 5000]
 #     beam_values: [16, 4, 1, 32]
 
+
+reduce_beams: "corruption"
+
 train_pipeline:
   -
     type: LoadMultiViewImageFromFiles

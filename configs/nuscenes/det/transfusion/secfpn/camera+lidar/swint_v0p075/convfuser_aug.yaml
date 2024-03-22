@@ -93,8 +93,6 @@ train_pipeline:
   -
     type: RandomFlip3D
   -
-    type: RandomImageBlackout
-  -
     type: PointsRangeFilter
     point_cloud_range: ${point_cloud_range}
   -
@@ -107,6 +105,8 @@ train_pipeline:
     type: ImageNormalize
     mean: [0.485, 0.456, 0.406]
     std: [0.229, 0.224, 0.225]
+  -
+    type: RandomImageZero
   - 
     type: GridMask
     use_h: true

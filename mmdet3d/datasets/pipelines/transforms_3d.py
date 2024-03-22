@@ -1091,29 +1091,31 @@ class ImageDistort:
         return data
 
 @PIPELINES.register_module()
-class RandomImageBlackout:
-    """
-    Randomly blacks out images in a dataset with a specified probability, simulating
-    the blackout effect statistically across the dataset rather than sequentially.
-    This is more suited to stateless processing pipelines.
-    
-    Args:
-        blackout_prob (float): Probability of an image being blacked out.
-        randomness (int): A factor to introduce randomness in the blackout start, 
-                          not applicable in the stateless implementation.
-    """
-    def __init__(self, blackout_prob=0.2):
-        self.blackout_prob = blackout_prob
+class RandomImageZero:
+    def __init__(self, prob_zero=0.2):
+        """
+        Initialize the class.
 
-    def __call__(self, results):
-        imgs = results['img']
-        new_imgs = []
+        Args:
+            prob_zero (float): The probability of setting an image to zero.
+                               Must be a value between 0 and 1, where 0 means no image will be zeroed,
+                               and 1 means all images will be zeroed.
+        """
+        self.prob_zero = prob_zero
 
-        for img in imgs:
-            if np.random.rand() < self.blackout_prob:
-                # Blackout the image
-                img = np.zeros_like(img)
-            new_imgs.append(img)
+    def __call__(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Apply the augmentation to the input data.
 
-        results['img'] = new_imgs
-        return results
+        Args:
+            data (Dict[str, Any]): The input data with an "img" field containing the images.
+
+        Returns:
+            Dict[str, Any]: The augmented data.
+        """
+        # Check if the current image should be set to zero based on the probability
+        if random.random() < self.prob_zero:
+            # If yes, set all images in the batch to zero
+            data["img"] = [torch.zeros_like(img) if isinstance(img, torch.Tensor) else np.zeros_like(img) for img in data["img"]]
+        # No need to modify the images if the probability check fails
+        return data

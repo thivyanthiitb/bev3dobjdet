@@ -14,7 +14,7 @@ data:
 #     beam_values: [16, 4, 1, 32]
 
 
-reduce_beams: 32
+reduce_beams: 0
 
 train_pipeline:
   -
@@ -98,7 +98,7 @@ train_pipeline:
     is_train: true
   -
     type: RandomImageZero
-    prob_zero: 0.4
+    prob_zero: 0.3
   -
     type: GlobalRotScaleTrans
     resize_lim: ${augment3d.scale}

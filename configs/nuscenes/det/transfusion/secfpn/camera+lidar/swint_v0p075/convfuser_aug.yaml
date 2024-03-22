@@ -93,7 +93,7 @@ train_pipeline:
   -
     type: RandomFlip3D
   -
-    type: FrameDropout
+    type: RandomImageBlackout
   -
     type: PointsRangeFilter
     point_cloud_range: ${point_cloud_range}

@@ -1089,3 +1089,31 @@ class ImageDistort:
             new_imgs.append(img)
         data["img"] = new_imgs
         return data
+
+@PIPELINES.register_module()
+class RandomImageBlackout:
+    """
+    Randomly blacks out images in a dataset with a specified probability, simulating
+    the blackout effect statistically across the dataset rather than sequentially.
+    This is more suited to stateless processing pipelines.
+    
+    Args:
+        blackout_prob (float): Probability of an image being blacked out.
+        randomness (int): A factor to introduce randomness in the blackout start, 
+                          not applicable in the stateless implementation.
+    """
+    def __init__(self, blackout_prob=0.2):
+        self.blackout_prob = blackout_prob
+
+    def __call__(self, results):
+        imgs = results['img']
+        new_imgs = []
+
+        for img in imgs:
+            if np.random.rand() < self.blackout_prob:
+                # Blackout the image
+                img = np.zeros_like(img)
+            new_imgs.append(img)
+
+        results['img'] = new_imgs
+        return results

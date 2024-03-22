@@ -1119,3 +1119,40 @@ class RandomImageZero:
             data["img"] = [torch.zeros_like(img) if isinstance(img, torch.Tensor) else np.zeros_like(img) for img in data["img"]]
         # No need to modify the images if the probability check fails
         return data
+
+@PIPELINES.register_module()
+class RandomPointDrop:
+    """
+    Randomly drops points from a LiDAR point cloud to simulate the effect of
+    sensor noise or occlusions. This augmentation can improve the robustness of
+    models that rely on point cloud data.
+
+    Args:
+        drop_prob (float): Probability of dropping a point. Should be a value
+                           between 0.0 and 1.0, where 0.0 means no points are
+                           dropped, and 1.0 would mean all points are dropped.
+    """
+
+    def __init__(self, drop_prob=0.0):
+        assert 0.0 <= drop_prob <= 1.0, "drop_prob must be between 0.0 and 1.0"
+        self.drop_prob = drop_prob
+
+    def __call__(self, results):
+        """
+        Applies the point drop augmentation to the point cloud data in the results.
+
+        Args:
+            results (dict): Result dict containing point cloud data under the 'points' key.
+                            The 'points' data should be an instance of `BasePoints`.
+
+        Returns:
+            dict: The result dict with the point cloud data modified.
+        """
+        if self.drop_prob > 0.0 and 'points' in results:
+            points = results['points'].tensor.numpy()  # Assuming points are stored in a `BasePoints` instance
+            # Generate a mask for dropping points
+            keep_mask = np.random.random(size=points.shape[0]) >= self.drop_prob
+            dropped_points = points[keep_mask]
+            results['points'].tensor = dropped_points  # Update points in-place; ensure correct data format
+
+        return results

@@ -82,7 +82,7 @@ def reduce_LiDAR_beams(pts, reduce_beams_to=32):
         pts = pts[~view_field_mask]
 
         # 3. Beam Drop: Randomly select the number of beams to drop and which beams they are
-        num_beams_to_drop = random.randint(1, 5)  # Randomly choose how many beams to drop
+        num_beams_to_drop = random.randint(1, 12)  # Randomly choose how many beams to drop
         beams_to_drop = random.sample(range(32), num_beams_to_drop)  # Which beams to drop
         beam_drop_mask = torch.ones(len(pts), dtype=torch.bool)
         for beam_id in beams_to_drop:

@@ -7,6 +7,12 @@ model:
 data:
   samples_per_gpu: 4
 
+
+# custom_hooks:
+#   - type: AdjustReduceBeamsHook
+#     milestones: [2000, 4000, 5000]
+#     beam_values: [16, 4, 1, 32]
+
 train_pipeline:
   -
     type: LoadMultiViewImageFromFiles
@@ -20,13 +26,22 @@ train_pipeline:
     load_augmented: ${load_augmented}
   -
     type: LoadPointsFromMultiSweeps
-    sweeps_num: 9
+    sweeps_num: 0
     load_dim: ${load_dim}
     use_dim: ${use_dim}
     reduce_beams: ${reduce_beams}
     pad_empty_sweeps: true
     remove_close: true
     load_augmented: ${load_augmented}
+  -
+    type: LoadRadarPointsMultiSweeps
+    load_dim: 18
+    sweeps_num: ${radar_sweeps}
+    use_dim: ${radar_use_dims}
+    max_num: ${radar_max_points}
+    compensate_velocity: ${radar_compensate_velocity}
+    filtering: ${radar_filtering}
+    normalize: ${radar_normalize}
   -
     type: LoadAnnotations3D
     with_bbox_3d: true
@@ -37,7 +52,7 @@ train_pipeline:
     stop_epoch: ${gt_paste_stop_epoch}
     db_sampler:
       dataset_root: ${dataset_root}
-      info_path: ${dataset_root + "nuscenes_dbinfos_train.pkl"}
+      info_path: ${'data/nuscenes/' + "nuscenes_dbinfos_train.pkl"}
       rate: 1.0
       prepare: 
         filter_by_difficulty: [-1]
@@ -79,17 +94,14 @@ train_pipeline:
     rand_flip: true
     is_train: true
   -
+    type: RandomImageZero
+    prob_zero: 0.2
+  -
     type: GlobalRotScaleTrans
     resize_lim: ${augment3d.scale}
     rot_lim: ${augment3d.rotate}
     trans_lim: ${augment3d.translate}
     is_train: true
-  -
-    type: LoadBEVSegmentation
-    dataset_root: ${dataset_root}
-    xbound: [-50.0, 50.0, 0.5]
-    ybound: [-50.0, 50.0, 0.5]
-    classes: ${map_classes}
   -
     type: RandomFlip3D
   -
@@ -105,8 +117,6 @@ train_pipeline:
     type: ImageNormalize
     mean: [0.485, 0.456, 0.406]
     std: [0.229, 0.224, 0.225]
-  -
-    type: RandomImageZero
   - 
     type: GridMask
     use_h: true
@@ -128,16 +138,16 @@ train_pipeline:
     keys:
       - img
       - points
+      - radar
       - gt_bboxes_3d
       - gt_labels_3d
-      - gt_masks_bev
     meta_keys:
       - camera_intrinsics
       - camera2ego
       - lidar2ego
       - lidar2camera
-      - camera2lidar
       - lidar2image
+      - camera2lidar
       - img_aug_matrix
       - lidar_aug_matrix
   -

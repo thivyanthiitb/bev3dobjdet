@@ -14,7 +14,7 @@ data:
 #     beam_values: [16, 4, 1, 32]
 
 
-reduce_beams: 0
+reduce_beams: 32
 
 train_pipeline:
   -

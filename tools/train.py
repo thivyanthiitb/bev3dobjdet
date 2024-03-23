@@ -3,9 +3,7 @@ import copy
 import os
 import random
 import time
-#extra
 from pprint import pformat
-
 import numpy as np
 import torch
 from mmcv import Config
@@ -21,23 +19,21 @@ from mmdet3d.utils import get_root_logger, convert_sync_batchnorm, recursive_eva
 
 def main():
     dist.init()
-
     parser = argparse.ArgumentParser()
-    
     # Add a new argument for specifying weights
     parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev"],
                     help="Specify the type of weights to load (none, unibev, metabev)")
-    
-    
     parser.add_argument("config", metavar="FILE", help="config file")
     parser.add_argument("--run-dir", metavar="DIR", help="run directory")
-    
-    
-
-    
     args, opts = parser.parse_known_args()
 
+    # cfg_from_file = True
+    # if cfg_from_file:
+    #     cfg = Config.fromfile(args.config)
+    # else:
+    
     configs.load(args.config, recursive=True)
+
     configs.update(opts)
 
     cfg = Config(recursive_eval(configs), filename=args.config)
@@ -147,6 +143,10 @@ def main():
         timestamp=timestamp,
     )
 
-
 if __name__ == "__main__":
     main()
+
+
+
+
+

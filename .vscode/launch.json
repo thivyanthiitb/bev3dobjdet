@@ -6,21 +6,29 @@
   "configurations": [
     
     {
-      "name": "train",
+      "name": "train bevfusion",
       "type": "debugpy",
       "request": "launch",
       "program": "tools/train.py",
       "console": "integratedTerminal",
       "justMyCode": false,
-      "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/unifuser.yaml --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth --data.samples_per_gpu 2 &>> all_logs/txts/240320_1100_forcefuse.txt"
+      "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/unifuser.yaml --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth --data.samples_per_gpu 2 &>> all_logs/txts/240320_11000.txt"
     },
     {
-      "name": "test",
+      "name": "test bevfusion",
       "type": "debugpy",
       "request": "launch",
       "program": "tools/test.py",
       "console": "integratedTerminal",
       "args": "configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/metafuser.yaml pretrained/bevfusion-det.pth --eval bbox >> all_logs/230315_0000.txt"
+    },
+    {
+      "name": "train futr3d",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "plugin/futr3d/tools/train.py",
+      "console": "integratedTerminal",
+      "args": "plugin/futr3d/configs/lidar_cam/lidar_0075v_cam_vov.py",
     }
   ]
 }

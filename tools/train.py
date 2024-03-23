@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser()
     
     # Add a new argument for specifying weights
-    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev", "bevfusion"],
+    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev", "bevfusion", "bevfusion_aug"],
                     help="Specify the type of weights to load (none, unibev, metabev)")
     
     

@@ -114,11 +114,12 @@ def parse_args():
     if args.options:
         warnings.warn("--options is deprecated in favor of --eval-options")
         args.eval_options = args.options
-    return args
+    args, opts = parser.parse_known_args()
+    return args, opts
 
 
 def main():
-    args = parse_args()
+    args, opts = parse_args()
     dist.init()
 
     torch.backends.cudnn.benchmark = True
@@ -137,7 +138,9 @@ def main():
         raise ValueError("The output file must be a pkl file.")
 
     configs.load(args.config, recursive=True)
+    configs.update(opts)
     cfg = Config(recursive_eval(configs), filename=args.config)
+    
     print(cfg)
 
     if args.cfg_options is not None:

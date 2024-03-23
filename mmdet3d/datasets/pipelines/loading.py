@@ -215,7 +215,7 @@ class LoadPointsFromMultiSweeps:
                 points_sweep = np.copy(points_sweep).reshape(-1, self.load_dim)
 
                 # TODO: make it more general
-                if self.reduce_beams and self.reduce_beams < 32:
+                if self.reduce_beams and self.reduce_beams < 32 :
                     points_sweep = reduce_LiDAR_beams(points_sweep, self.reduce_beams)
 
                 if self.remove_close:

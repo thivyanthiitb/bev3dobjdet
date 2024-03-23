@@ -21,7 +21,7 @@ def main():
     dist.init()
     parser = argparse.ArgumentParser()
     # Add a new argument for specifying weights
-    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev"],
+    parser.add_argument("--weights", default="none", choices=["none", "unibev", "metabev", "bevfusion", "bevfusion_aug"],
                     help="Specify the type of weights to load (none, unibev, metabev)")
     parser.add_argument("config", metavar="FILE", help="config file")
     parser.add_argument("--run-dir", metavar="DIR", help="run directory")
@@ -99,12 +99,38 @@ def main():
             pretrained_unibev_dict = torch.load("pretrained/unibev_epoch_1.pth")["state_dict"]
             model.load_state_dict(pretrained_unibev_dict, strict=False)
             
-            for param in model.parameters():
-                param.requires_grad = False
+            # for param in model.parameters():
+            #     param.requires_grad = False
 
-            for param in model.fuser.parameters():
-                param.requires_grad = True
+            # for param in model.fuser.parameters():
+            #     param.requires_grad = True
             print("unibev weights loaded")
+        
+        elif weights_type == 'bevfusion':
+            # Insert logic to load 
+            
+            pretrained_dict = torch.load("pretrained/bevfusion-det.pth")["state_dict"]
+            model.load_state_dict(pretrained_dict, strict=False)
+            
+            # for param in model.parameters():
+            #     param.requires_grad = True
+
+            # for param in model.fuser.parameters():
+            #     param.requires_grad = True
+            print("bevfusion weights loaded")
+            
+        elif weights_type == 'bevfusion_aug':
+            # Insert logic to load 
+            
+            pretrained_dict = torch.load("test/convfuser/epoch_2.pth")["state_dict"]
+            model.load_state_dict(pretrained_dict, strict=False)
+            
+            # for param in model.parameters():
+            #     param.requires_grad = True
+
+            # for param in model.fuser.parameters():
+            #     param.requires_grad = True
+            print("bevfusion weights loaded")
             
         elif weights_type == 'metabev':
             # Insert logic to load METABEV weights

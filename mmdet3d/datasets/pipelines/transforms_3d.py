@@ -1089,3 +1089,70 @@ class ImageDistort:
             new_imgs.append(img)
         data["img"] = new_imgs
         return data
+
+@PIPELINES.register_module()
+class RandomImageZero:
+    def __init__(self, prob_zero=0.2):
+        """
+        Initialize the class.
+
+        Args:
+            prob_zero (float): The probability of setting an image to zero.
+                               Must be a value between 0 and 1, where 0 means no image will be zeroed,
+                               and 1 means all images will be zeroed.
+        """
+        self.prob_zero = prob_zero
+
+    def __call__(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Apply the augmentation to the input data.
+
+        Args:
+            data (Dict[str, Any]): The input data with an "img" field containing the images.
+
+        Returns:
+            Dict[str, Any]: The augmented data.
+        """
+        # Check if the current image should be set to zero based on the probability
+        if random.random() < self.prob_zero:
+            # If yes, set all images in the batch to zero
+            data["img"] = [torch.zeros_like(img) if isinstance(img, torch.Tensor) else np.zeros_like(img) for img in data["img"]]
+        # No need to modify the images if the probability check fails
+        return data
+
+@PIPELINES.register_module()
+class RandomPointDrop:
+    """
+    Randomly drops points from a LiDAR point cloud to simulate the effect of
+    sensor noise or occlusions. This augmentation can improve the robustness of
+    models that rely on point cloud data.
+
+    Args:
+        drop_prob (float): Probability of dropping a point. Should be a value
+                           between 0.0 and 1.0, where 0.0 means no points are
+                           dropped, and 1.0 would mean all points are dropped.
+    """
+
+    def __init__(self, drop_prob=0.0):
+        assert 0.0 <= drop_prob <= 1.0, "drop_prob must be between 0.0 and 1.0"
+        self.drop_prob = drop_prob
+
+    def __call__(self, results):
+        """
+        Applies the point drop augmentation to the point cloud data in the results.
+
+        Args:
+            results (dict): Result dict containing point cloud data under the 'points' key.
+                            The 'points' data should be an instance of `BasePoints`.
+
+        Returns:
+            dict: The result dict with the point cloud data modified.
+        """
+        if self.drop_prob > 0.0 and 'points' in results:
+            points = results['points'].tensor.numpy()  # Assuming points are stored in a `BasePoints` instance
+            # Generate a mask for dropping points
+            keep_mask = np.random.random(size=points.shape[0]) >= self.drop_prob
+            dropped_points = points[keep_mask]
+            results['points'].tensor = dropped_points  # Update points in-place; ensure correct data format
+
+        return results

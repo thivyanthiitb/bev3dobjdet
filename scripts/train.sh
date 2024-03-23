@@ -16,16 +16,16 @@ elif [ "$1" == "2" ]; then
     echo "Running second training command..."
     CUDA_VISIBLE_DEVICES=1
     torchpack dist-run -np 2 python tools/train.py \
-        --weights bevfusion \
+        --weights bevfusion_aug \
         configs/nuscenes/det/transfusion/secfpn/camera+lidar/swint_v0p075/convfuser.yaml \
         --model.encoders.camera.backbone.init_cfg.checkpoint pretrained/swint-nuimages-pretrained.pth \
         --dataset_type NuScenesDataset \
         --dataset_root data/nuscenes/ \
         --data.samples_per_gpu 12 \
-        --max_epochs 2 \
+        --max_epochs 4 \
         --reduce_beams 0 \
         --load_augmented mvp \
-        2>&1 | tee all_logs/txts/240320_1100_forcefuse_unibev_from_epoch2.txt \
+        2>&1 | tee all_logs/240323_0700_convfuser_aug_from_epoch2.txt \
 else
     echo "Invalid argument. Please specify '1' for the first command or '2' for the second."
 fi

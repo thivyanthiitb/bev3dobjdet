@@ -123,6 +123,19 @@ def main():
             #     param.requires_grad = True
             print("bevfusion weights loaded")
             
+        elif weights_type == 'bevfusion_aug':
+            # Insert logic to load 
+            
+            pretrained_dict = torch.load("test/convfuser/epoch_2.pth")["state_dict"]
+            model.load_state_dict(pretrained_dict, strict=False)
+            
+            # for param in model.parameters():
+            #     param.requires_grad = True
+
+            # for param in model.fuser.parameters():
+            #     param.requires_grad = True
+            print("bevfusion weights loaded")
+            
         elif weights_type == 'metabev':
             # Insert logic to load METABEV weights
             metabev_state_dict = model.state_dict()

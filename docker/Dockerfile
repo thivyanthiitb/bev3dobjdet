@@ -7,7 +7,7 @@ RUN apt-get install libgl1-mesa-glx libglib2.0-0 -y
 RUN apt-get install openmpi-bin openmpi-common libopenmpi-dev libgtk2.0-dev git -y
 
 # Define a build-time argument for the MASTER_HOST
-ARG MASTER_HOST_ARG=10.172.4.244:14550  # default value
+# ARG MASTER_HOST_ARG=10.172.4.244:14550  # default value
 
 # Set the environment variable inside the image
 ENV MASTER_HOST=$MASTER_HOST_ARG

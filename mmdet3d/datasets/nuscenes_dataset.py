@@ -16,7 +16,7 @@ from .custom_3d import Custom3DDataset
 
 
 @DATASETS.register_module()
-class RoboDriveDataset(Custom3DDataset):
+class NuScenesDataset(Custom3DDataset):
     r"""NuScenes Dataset.
 
     This class serves as the API for experiments on the NuScenes Dataset.
@@ -209,23 +209,16 @@ class RoboDriveDataset(Custom3DDataset):
     def get_data_info(self, index: int) -> Dict[str, Any]:
         info = self.data_infos[index]
 
-        lidar_path = info["lidar_path"].replace('./data/nuscenes', './data/robodrive-sensor')
-        sweeps = info["sweeps"]
-        for idx, sweep in enumerate(sweeps):
-            data_path = sweep["data_path"]
-            data_path = data_path.replace('./data/nuscenes', './data/robodrive-sensor')
-            sweeps[idx]["data_path"] = data_path
-
         data = dict(
+            # TODO: delete later
+            prev_token=-1 if info['prev_token']=='' else 1,
             token=info["token"],
             sample_idx=info['token'],
-            lidar_path=lidar_path,
-            # use sweeps padding
-            sweeps=sweeps,
+            lidar_path=info["lidar_path"],
+            sweeps=info["sweeps"],
             timestamp=info["timestamp"],
             location=info.get('location', None), 
-            # radar=info.get('radars', None), 
-            radar=None
+            radar=info.get('radars', None), 
         )
 
         if data['location'] is None:
@@ -254,10 +247,7 @@ class RoboDriveDataset(Custom3DDataset):
             data["camera2lidar"] = []
 
             for _, camera_info in info["cams"].items():
-                data_path = camera_info["data_path"]
-                # print(data_path)
-                # data_path = data_path.replace('./data/nuscenes', '/home/shaoyux/data/robodrive-sensor')
-                data["image_paths"].append(data_path)
+                data["image_paths"].append(camera_info["data_path"])
 
                 # lidar to camera transform
                 lidar2camera_r = np.linalg.inv(camera_info["sensor2lidar_rotation"])
@@ -292,8 +282,7 @@ class RoboDriveDataset(Custom3DDataset):
                 camera2lidar[:3, 3] = camera_info["sensor2lidar_translation"]
                 data["camera2lidar"].append(camera2lidar)
 
-        # annos = self.get_ann_info(index)
-        annos = []
+        annos = self.get_ann_info(index)
         data["ann_info"] = annos
         return data
 
@@ -388,14 +377,14 @@ class RoboDriveDataset(Custom3DDataset):
                     elif name in ["bicycle", "motorcycle"]:
                         attr = "cycle.with_rider"
                     else:
-                        attr = RoboDriveDataset.DefaultAttribute[name]
+                        attr = NuScenesDataset.DefaultAttribute[name]
                 else:
                     if name in ["pedestrian"]:
                         attr = "pedestrian.standing"
                     elif name in ["bus"]:
                         attr = "vehicle.stopped"
                     else:
-                        attr = RoboDriveDataset.DefaultAttribute[name]
+                        attr = NuScenesDataset.DefaultAttribute[name]
 
                 nusc_anno = dict(
                     sample_token=sample_token,
@@ -570,6 +559,7 @@ class RoboDriveDataset(Custom3DDataset):
 
         if "boxes_3d" in results[0]:
             result_files, tmp_dir = self.format_results(results, jsonfile_prefix)
+
             if isinstance(result_files, dict):
                 for name in result_names:
                     print("Evaluating bboxes of {}".format(name))
@@ -580,7 +570,6 @@ class RoboDriveDataset(Custom3DDataset):
 
             if tmp_dir is not None:
                 tmp_dir.cleanup()
-        print('===\nNot support evaluate locally, please upload to the server.')
 
         return metrics
 
